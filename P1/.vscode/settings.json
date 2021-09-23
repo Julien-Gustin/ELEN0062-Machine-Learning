@@ -1,0 +1,10 @@
+{
+    "python.formatting.autopep8Args": [
+        "\"python.formatting.autopep8Args\": [\"--max-line-length\", \"120\", \"--experimental\"],"
+    ],
+    "files.associations": {
+        "*.html": "html",
+        "TEST.C": "cpp"
+    },
+    "discord.enabled": true
+}
