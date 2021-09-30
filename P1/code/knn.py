@@ -49,7 +49,7 @@ def save_best_neighbor_fig(filename : str, xlabel : str, ylabel : str, title: st
 
 if __name__ == "__main__":
 
-    X, y = make_unbalanced_dataset(3000)
+    X, y = make_unbalanced_dataset(3000, random_state=42)
     X_train, y_train, X_test, y_test = split_train_test(X, y, 1000)
     n_neighbors_values = [1, 5, 50, 100, 500]
     
@@ -61,7 +61,7 @@ if __name__ == "__main__":
         neighbor_classifier.fit(X_train, y_train)
         #Generate graph with boundaries
         file_name = "knn_" + str(n_neighbors) + "_neighbors"
-        plot_boundary("images/" + file_name, neighbor_classifier, X_train, y_train, 0.1, "Test KNN")
+        plot_boundary("../images/" + file_name, neighbor_classifier, X_train, y_train, 0.1, "Test KNN")
         #Memorize the score
         scores.append(neighbor_classifier.score(X_test, y_test))
 
@@ -71,9 +71,9 @@ if __name__ == "__main__":
         #Create classifier 
         neighbor_classifier = KNeighborsClassifier(n_neighbors)
         #Compute score of each fold
-        score_per_fold = cross_val_score(neighbor_classifier, X, y, cv=10)
+        score_per_fold = cross_val_score(neighbor_classifier, X_train, y_train, cv=10)
         #Memorize the score
-        scores_cross_val.append(sum(score_per_fold)/len(score_per_fold))
+        scores_cross_val.append(np.mean(score_per_fold))
 
     print_results(n_neighbors_values, scores, scores_cross_val)
 
@@ -81,13 +81,14 @@ if __name__ == "__main__":
     test_set_size = 500
     training_set_sizes = [50, 150, 250, 350, 500]
     best_neighbors = list()
+    seed = 0
 
     for training_set_size in training_set_sizes:
-        mean_test_accuracies = [0] * training_set_size
+        mean_test_accuracies = np.zeros(training_set_size)
         for n in range(10):
-            X, y = make_unbalanced_dataset(3000)
+            seed += 1
+            X, y = make_unbalanced_dataset(training_set_size+test_set_size, random_state=(seed))
             X_train, y_train, X_test, y_test = split_train_test(X, y, training_set_size)
-            X_test, y_test = X_test[:500], y_test[:500]
             
             for i in range(training_set_size):
                 neighbor_classifier = KNeighborsClassifier(i+1)
@@ -97,17 +98,18 @@ if __name__ == "__main__":
         mean_test_accuracies = [acc / 10 for acc in mean_test_accuracies]
         best_neighbors.append(argmax(mean_test_accuracies) + 1)
         add_to_accuracy_fig(mean_test_accuracies)
+    print(best_neighbors)
 
     #save plots
     plt.xlabel("Number of neighbors")
     plt.ylabel("Mean test accuracy")
     plt.title("Evolution of the mean test accuracies with different training set sizes")
     plt.legend()
-    plt.savefig("images/knn_mean_test_accuracies")
+    plt.savefig("../images/knn_mean_test_accuracies")
     plt.close()
 
     save_best_neighbor_fig(
-        "images/knn_best_neighbor_with_respect_to_training_set_size", 
+        "../images/knn_best_neighbor_with_respect_to_training_set_size", 
         "Training size",
         "Optimal number of neighbors",
         "Optimal number of neighbors with respect to the training set size",
