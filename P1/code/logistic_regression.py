@@ -86,8 +86,14 @@ class LogisticRegressionClassifier(BaseEstimator, ClassifierMixin):
         y : array of shape = [n_samples]
             The predicted classes, or the predict values.
         """
-
-        # TODO insert your code here
+        y = list()
+        n_instances = X.shape[0]
+        bias = np.ones(n_instances)
+        X_ = np.c_[bias, X]
+        for sample in X_:
+            product = self.theta_.dot(sample)
+            y.append(int(product >= 0))
+        return np.array(y)
         pass
 
     def predict_proba(self, X):
@@ -104,7 +110,14 @@ class LogisticRegressionClassifier(BaseEstimator, ClassifierMixin):
             The class probabilities of the input samples. Classes are ordered
             by lexicographic order.
         """
-        # TODO insert your code here
+        p = list()
+        n_instances = X.shape[0]
+        bias = np.ones(n_instances)
+        X_ = np.c_[bias, X]
+        for sample in X_:
+            probability = (1 / (1 + np.math.exp(-self.theta_.dot(sample))))
+            p.append((probability, 1-probability))
+        return np.array(p)
         pass
 
 
@@ -112,5 +125,7 @@ if __name__ == "__main__":
     X, y = make_unbalanced_dataset(1000, random_state=42)
     logistic_reg = LogisticRegressionClassifier()
     logistic_reg.fit(X, y)
-
+    z = np.array([1.2, 1.3])
+    print(logistic_reg.predict(X))
+    print(logistic_reg.predict_proba(X))
     pass
