@@ -17,11 +17,9 @@ from sklearn.base import ClassifierMixin
 
 
 class LogisticRegressionClassifier(BaseEstimator, ClassifierMixin):
-
     def __init__(self, n_iter=10, learning_rate=1):
         self.n_iter = n_iter
         self.learning_rate = learning_rate
-
 
     def fit(self, X, y):
         """Fit a logistic regression models on (X, y)
@@ -51,14 +49,29 @@ class LogisticRegressionClassifier(BaseEstimator, ClassifierMixin):
 
         n_classes = len(np.unique(y))
         if n_classes != 2:
-            raise ValueError("This class is only dealing with binary "
-                             "classification problems")
+            raise ValueError(
+                "This class is only dealing with binary " "classification problems"
+            )
 
+        w1 = 1  # init?
+        w2 = 1
 
-        # TODO insert your code here
+        self.theta_ = np.array([1, w1, w2])  # [bias, param1, param2]
+        bias = np.ones(n_instances)  # [1, ..., 1]
+        X_ = np.c_[
+            bias, X
+        ]  # [[1, x_0,1, x_0,2], ... [1, x_(n_instances-1),1 , x_(n_instances-1),2]]
+
+        for _ in range(self.n_iter):  # do the gradiant descent
+            sum_ = np.zeros(len(self.theta_))
+            for xi, yi in zip(X_, y):  # iter for each instances
+                sum_ += (1 / (1 + np.math.exp(-self.theta_.dot(xi))) - yi) * xi
+
+            loss = 1 / n_instances * sum_  # compute the loss
+            self.theta_ = self.theta_ - self.learning_rate * loss  # update parameters
+            print(self.theta_)
 
         return self
-
 
     def predict(self, X):
         """Predict class for X.
@@ -94,5 +107,10 @@ class LogisticRegressionClassifier(BaseEstimator, ClassifierMixin):
         # TODO insert your code here
         pass
 
+
 if __name__ == "__main__":
+    X, y = make_unbalanced_dataset(1000, random_state=42)
+    logistic_reg = LogisticRegressionClassifier()
+    logistic_reg.fit(X, y)
+
     pass
