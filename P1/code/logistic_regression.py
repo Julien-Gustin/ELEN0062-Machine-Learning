@@ -8,6 +8,7 @@ Project 1 - Classification algorithms
 
 import numpy as np
 import matplotlib.pyplot as plt
+from numpy.core.fromnumeric import prod
 
 from plot import plot_boundary
 from data import make_balanced_dataset, make_unbalanced_dataset
@@ -16,10 +17,26 @@ from sklearn.base import BaseEstimator
 from sklearn.base import ClassifierMixin
 
 
+def sigmoid_function(x):
+    """Apply the sigmoid function to `x`
+
+    Parameters
+    ----------
+    x : A reel number
+        The input of sigmoid function
+
+    Returns:
+        p : a reel number between 0 and 1
+    """
+    p = 1 / (1 + np.math.exp(-x))
+    return p
+
+
 class LogisticRegressionClassifier(BaseEstimator, ClassifierMixin):
     def __init__(self, n_iter=10, learning_rate=1):
         self.n_iter = n_iter
         self.learning_rate = learning_rate
+
 
     def fit(self, X, y):
         """Fit a logistic regression models on (X, y)
@@ -65,11 +82,11 @@ class LogisticRegressionClassifier(BaseEstimator, ClassifierMixin):
         for _ in range(self.n_iter):  # do the gradiant descent
             sum_ = np.zeros(len(self.theta_))
             for xi, yi in zip(X_, y):  # iter for each instances
-                sum_ += (1 / (1 + np.math.exp(-self.theta_.dot(xi))) - yi) * xi
+                sum_ += (sigmoid_function(self.theta_.dot(xi)) - yi) * xi
 
             loss = 1 / n_instances * sum_  # compute the loss
             self.theta_ = self.theta_ - self.learning_rate * loss  # update parameters
-            print(self.theta_)
+            # print(self.theta_)
 
         return self
 
@@ -86,15 +103,17 @@ class LogisticRegressionClassifier(BaseEstimator, ClassifierMixin):
         y : array of shape = [n_samples]
             The predicted classes, or the predict values.
         """
-        y = list()
         n_instances = X.shape[0]
+        y = np.zeros(n_instances)
         bias = np.ones(n_instances)
         X_ = np.c_[bias, X]
-        for sample in X_:
+        for i, sample in enumerate(X_):
             product = self.theta_.dot(sample)
-            y.append(int(product >= 0))
-        return np.array(y)
-        pass
+            y[i] = product
+
+        y = np.array(y>0.0, dtype=int)
+
+        return y
 
     def predict_proba(self, X):
         """Return probability estimates for the test data X.
@@ -115,17 +134,16 @@ class LogisticRegressionClassifier(BaseEstimator, ClassifierMixin):
         bias = np.ones(n_instances)
         X_ = np.c_[bias, X]
         for sample in X_:
-            probability = (1 / (1 + np.math.exp(-self.theta_.dot(sample))))
-            p.append((probability, 1-probability))
+            probability = sigmoid_function(self.theta_.dot(sample))
+            p.append((1-probability, probability))
         return np.array(p)
         pass
 
 
 if __name__ == "__main__":
-    X, y = make_unbalanced_dataset(1000, random_state=42)
+    X, y = make_unbalanced_dataset(10, random_state=42)
     logistic_reg = LogisticRegressionClassifier()
     logistic_reg.fit(X, y)
     z = np.array([1.2, 1.3])
-    print(logistic_reg.predict(X))
-    print(logistic_reg.predict_proba(X))
-    pass
+    plot_boundary("../images/lg", logistic_reg, X, y, mesh_step_size=0.1, title="Test logistic")
+
