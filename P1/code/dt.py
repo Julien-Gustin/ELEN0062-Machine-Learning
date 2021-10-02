@@ -42,10 +42,10 @@ def split_train_test(
         y_train: array of shape [n_points]
         y_test: array of shape [n_points]
     """
-    X_full, y_full = make_unbalanced_dataset(3000, random_state=seed)
+    X_full, y_full = make_unbalanced_dataset(samples, random_state=seed)
 
-    X_train, X_test = X_full[:1000], X_full[1000:]
-    y_train, y_test = y_full[:1000], y_full[1000:]
+    X_train, X_test = X_full[:train_size], X_full[train_size:]
+    y_train, y_test = y_full[:train_size], y_full[train_size:]
     return X_train, X_test, y_train, y_test
 
 
@@ -130,7 +130,7 @@ if __name__ == "__main__":
     tree_clfs = create_and_fit_models(min_samples_splits, 42, X_train, y_train)
     for tree_clf in tree_clfs:
         make_plots(tree_clf, X_test, y_test, True)
-
+        print(confusion_matrix(y_true=y_test, y_pred=tree_clf.predict(X_test)))
     # Q3
 
     n = 5

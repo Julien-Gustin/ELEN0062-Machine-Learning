@@ -17,6 +17,29 @@ from sklearn.base import BaseEstimator
 from sklearn.base import ClassifierMixin
 
 
+def split_train_test(
+    train_size: int = 1000, samples: int = 3000, seed: int = 42
+) -> tuple:
+    """Return the train and test set
+
+    Args:
+        train_size (int, optional): Size of training set. Defaults to 1000.
+        samples (int, optional): Samples' size. Defaults to 3000.
+        seed (int): The random state
+
+    Returns:
+        X_train: array of shape [n_points, 2]
+        X_test: array of shape [n_points, 2]
+        y_train: array of shape [n_points]
+        y_test: array of shape [n_points]
+    """
+    X_full, y_full = make_unbalanced_dataset(samples, random_state=seed)
+
+    X_train, X_test = X_full[:train_size], X_full[train_size:]
+    y_train, y_test = y_full[:train_size], y_full[train_size:]
+    return X_train, X_test, y_train, y_test
+
+
 def sigmoid_function(x):
     """Apply the sigmoid function to `x`
 
@@ -36,7 +59,6 @@ class LogisticRegressionClassifier(BaseEstimator, ClassifierMixin):
     def __init__(self, n_iter=10, learning_rate=1):
         self.n_iter = n_iter
         self.learning_rate = learning_rate
-
 
     def fit(self, X, y):
         """Fit a logistic regression models on (X, y)
@@ -111,7 +133,7 @@ class LogisticRegressionClassifier(BaseEstimator, ClassifierMixin):
             product = self.theta_.dot(sample)
             y[i] = product
 
-        y = np.array(y>0.0, dtype=int)
+        y = np.array(y > 0.0, dtype=int)
 
         return y
 
@@ -135,15 +157,62 @@ class LogisticRegressionClassifier(BaseEstimator, ClassifierMixin):
         X_ = np.c_[bias, X]
         for sample in X_:
             probability = sigmoid_function(self.theta_.dot(sample))
-            p.append((1-probability, probability))
+            p.append((1 - probability, probability))
         return np.array(p)
         pass
 
 
 if __name__ == "__main__":
-    X, y = make_unbalanced_dataset(10, random_state=42)
+    X_train, X_test, y_train, y_test = split_train_test()
     logistic_reg = LogisticRegressionClassifier()
-    logistic_reg.fit(X, y)
+    logistic_reg.fit(X_train, y_train)
     z = np.array([1.2, 1.3])
-    plot_boundary("../images/lg", logistic_reg, X, y, mesh_step_size=0.1, title="Test logistic")
+    plot_boundary(
+        "../images/LR",
+        logistic_reg,
+        X_test,
+        y_test,
+        mesh_step_size=0.1,
+        title="Test logistic",
+    )
 
+    n = 5
+    scores = np.zeros(n)
+    scores = {}
+
+    for lr in [0.1, 0.5, 1, 2]:
+        for n_iter in [5, 10, 50, 150]:
+            scores[(lr, n_iter)] = np.zeros(n)
+            for i in range(n):
+                X_train, X_test, y_train, y_test = split_train_test(seed=i)
+                logistic_reg = LogisticRegressionClassifier(
+                    learning_rate=lr, n_iter=n_iter
+                )
+                logistic_reg.fit(X_train, y_train)
+                scores[(lr, n_iter)][i] = logistic_reg.score(X_test, y_test)
+
+    for (lr, n_iter), score in scores.items():
+        print(
+            "\tLearning rate: {}"
+            "\n\tNumber of iteration: {}"
+            "\n\tMean score: {} (+- {})".format(
+                lr, n_iter, score.mean().round(3), score.std().round(3)
+            )
+        )
+        print("-" * 50)
+
+    for n_iter in [5, 10, 50, 150]:
+        print(n_iter)
+        for lr in [0.1, 0.5, 1, 2]:
+            print(
+                "& {} (\pm{})".format(
+                    (scores[(lr, n_iter)].mean()*100).round(2),
+                    (scores[(lr, n_iter)].std()*100).round(2),
+                )
+            )
+
+        print("\\\\")
+
+    print("\hline")
+
+    print(lr, n_iter)
