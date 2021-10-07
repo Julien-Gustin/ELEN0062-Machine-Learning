@@ -76,10 +76,7 @@ def create_and_fit_models(
 
 
 def make_plots(
-    tree_clf: DecisionTreeClassifier,
-    X: np.array,
-    y: np.array,
-    plot_tree: bool = False,
+    tree_clf: DecisionTreeClassifier, X: np.array, y: np.array, plot_tree: bool = False,
 ):
     """Create plot in the "../images" directory
 
@@ -98,30 +95,26 @@ def make_plots(
         y,
     )
 
-    try:
-        from graphviz import Source
-        from sklearn.tree import export_graphviz
+    if plot_tree:
+        try:
+            from graphviz import Source
+            from sklearn.tree import export_graphviz
 
-        export_graphviz(tree_clf, out_file="out.dot", rounded=True, filled=True)
+            export_graphviz(tree_clf, out_file="out.dot", rounded=True, filled=True)
 
-        Source.from_file("out.dot")
-        os.system(
-            "dot -Tpng out.dot -o"
-            + os.path.join(
-                IMAGES_PATH, "tree_{}_samples_split.png".format(samples_split)
+            Source.from_file("out.dot")
+            os.system(
+                "dot -Tpng out.dot -o"
+                + os.path.join(
+                    IMAGES_PATH, "tree_{}_samples_split.png".format(samples_split)
+                )
             )
-        )
-        os.system("rm out.dot")
-    except:
-        print('Please install "graphviz" or set `plot_tree` to False')
-
-
-def compute_accuracies(model: DecisionTreeClassifier, X, y):
-    print(model.score(X, y))
+            os.system("rm out.dot")
+        except:
+            print('Please install "graphviz" or set `plot_tree` to False')
 
 
 if __name__ == "__main__":
-    # Put your code here
 
     # Q1
     X_train, X_test, y_train, y_test = split_train_test()
@@ -130,9 +123,8 @@ if __name__ == "__main__":
     tree_clfs = create_and_fit_models(min_samples_splits, 42, X_train, y_train)
     for tree_clf in tree_clfs:
         make_plots(tree_clf, X_test, y_test, True)
-        print(confusion_matrix(y_true=y_test, y_pred=tree_clf.predict(X_test)))
-    # Q3
 
+    # Q3
     n = 5
 
     statistics = np.zeros((n, len(tree_clfs)))
@@ -144,9 +136,6 @@ if __name__ == "__main__":
         for j, tree_clf in enumerate(tree_clfs):
             statistics[i][j] = tree_clf.score(X_test, y_test)
 
-    print(min_samples_splits)
-    print(np.mean(statistics, 0)*100)
-    print(np.std(statistics, 0)*100)
-        
-
-    pass
+    print("min_samples_splits: {}".format(min_samples_splits))
+    print("mean accuracy associated: {}".format(np.mean(statistics, 0) * 100))
+    print("and its standard deviation: {}".format(np.std(statistics, 0) * 100))

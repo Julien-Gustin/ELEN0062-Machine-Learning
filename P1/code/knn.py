@@ -117,10 +117,3 @@ if __name__ == "__main__":
         training_set_sizes)
     plt.close()
     pass
-
-
-#Q1:
-# Boundaries become smoother and smoother as k grows. With k = 1, each observation has a big impact on the model, meaning that the model doesn't generalise very well
-# When taking higher values of k, the boundary decision separates the surface in two parts: a big blue surface and a big orange surface
-# Therefore, when k grows, the model seems to say that the observations on the bottom left are classified as "Negative", 
-# while the observations on the upper right are classified as "Positive".

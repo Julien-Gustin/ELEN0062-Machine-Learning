@@ -22,16 +22,20 @@ def split_train_test(
 ) -> tuple:
     """Return the train and test set
 
-    Args:
-        train_size (int, optional): Size of training set. Defaults to 1000.
-        samples (int, optional): Samples' size. Defaults to 3000.
-        seed (int): The random state
+    Parameters
+    ----------
+    train_size : int 
+                 Size of training set. Defaults to 1000.
+    samples : int
+              Samples' size. Defaults to 3000.
+    seed : int
+           The random state
 
     Returns:
-        X_train: array of shape [n_points, 2]
-        X_test: array of shape [n_points, 2]
-        y_train: array of shape [n_points]
-        y_test: array of shape [n_points]
+        X_train: array of shape = [n_points, 2]
+        X_test: array of shape = [n_points, 2]
+        y_train: array of shape = [n_points]
+        y_test: array of shape = [n_points]
     """
     X_full, y_full = make_unbalanced_dataset(samples, random_state=seed)
 
@@ -92,23 +96,27 @@ class LogisticRegressionClassifier(BaseEstimator, ClassifierMixin):
                 "This class is only dealing with binary " "classification problems"
             )
 
-        w1 = 0.2  # init?
-        w2 = -0.2
+        self.coef_ = np.ones(n_features)
+        self.intercept_ = 1
 
-        self.theta_ = np.array([1, w1, w2])  # [bias, param1, param2]
-        bias = np.ones(n_instances)  # [1, ..., 1]
-        X_ = np.c_[
-            bias, X
-        ]  # [[1, x_0,1, x_0,2], ... [1, x_(n_instances-1),1 , x_(n_instances-1),2]]
+        # do the gradiant descent
+        for _ in range(self.n_iter):
+            sum_coef = np.zeros(len(self.coef_))
+            sum_intercept = 0
 
-        for _ in range(self.n_iter):  # do the gradiant descent
-            sum_ = np.zeros(len(self.theta_))
-            for xi, yi in zip(X_, y):  # iter for each instances
-                sum_ += (sigmoid_function(self.theta_.dot(xi)) - yi) * xi
+            # iter for each instances
+            for x_i, y_i in zip(X, y):
+                residual = sigmoid_function(self.coef_.dot(x_i) + self.intercept_) - y_i
+                sum_coef += residual * x_i
+                sum_intercept += residual
 
-            loss = 1 / n_instances * sum_  # compute the loss
-            self.theta_ = self.theta_ - self.learning_rate * loss  # update parameters
-            # print(self.theta_)
+            # compute the loss
+            loss_coef = 1 / n_instances * sum_coef
+            loss_intercept = 1 / n_instances * sum_intercept
+
+            # update parameters
+            self.coef_ = self.coef_ - self.learning_rate * loss_coef
+            self.intercept_ = self.intercept_ - self.learning_rate * loss_intercept
 
         return self
 
@@ -125,12 +133,16 @@ class LogisticRegressionClassifier(BaseEstimator, ClassifierMixin):
         y : array of shape = [n_samples]
             The predicted classes, or the predict values.
         """
-        n_instances = X.shape[0]
+        # Input validation
+        X = np.asarray(X, dtype=np.float)
+        if X.ndim != 2:
+            raise ValueError("X must be 2 dimensional")
+        n_instances, n_features = X.shape
+
         y = np.zeros(n_instances)
         bias = np.ones(n_instances)
-        X_ = np.c_[bias, X]
-        for i, sample in enumerate(X_):
-            product = self.theta_.dot(sample)
+        for i, sample in enumerate(X):
+            product = self.coef_.dot(sample) + self.intercept_
             y[i] = product
 
         y = np.array(y > 0.0, dtype=int)
@@ -151,21 +163,23 @@ class LogisticRegressionClassifier(BaseEstimator, ClassifierMixin):
             The class probabilities of the input samples. Classes are ordered
             by lexicographic order.
         """
+        # Input validation
+        X = np.asarray(X, dtype=np.float)
+        if X.ndim != 2:
+            raise ValueError("X must be 2 dimensional")
+
         p = list()
-        n_instances = X.shape[0]
-        bias = np.ones(n_instances)
-        X_ = np.c_[bias, X]
-        for sample in X_:
-            probability = sigmoid_function(self.theta_.dot(sample))
+        for sample in X:
+            probability = sigmoid_function(self.coef_.dot(sample) + self.intercept_)
             p.append((1 - probability, probability))
-        return np.array(p)
-        pass
+
+        p = np.array(p)
+        return p
 
 
 if __name__ == "__main__":
 
     # Q5
-
     X_train, X_test, y_train, y_test = split_train_test()
     logistic_reg = LogisticRegressionClassifier()
     logistic_reg.fit(X_train, y_train)
@@ -178,11 +192,12 @@ if __name__ == "__main__":
         title="Test logistic",
     )
 
+    # Q6
+    print("Q6) \n")
+
     n = 5
     scores = np.zeros(n)
     scores = {}
-
-    # Q6
 
     for lr in [0.1, 0.5, 1, 2]:
         for n_iter in [5, 10, 50, 150]:
@@ -200,30 +215,13 @@ if __name__ == "__main__":
             "\tLearning rate: {}"
             "\n\tNumber of iteration: {}"
             "\n\tMean score: {} (+- {})".format(
-                lr, n_iter, score.mean().round(3), score.std().round(3)
+                lr, n_iter, score.mean().round(4), score.std().round(4)
             )
         )
         print("-" * 50)
 
-    """ TO DELETE
-    for n_iter in [5, 10, 50, 150]:
-        print(n_iter)
-        for lr in [0.1, 0.5, 1, 2]:
-            print(
-                "& {} (\pm{})".format(
-                    (scores[(lr, n_iter)].mean()*100).round(2),
-                    (scores[(lr, n_iter)].std()*100).round(2),
-                )
-            )
-
-        print("\\\\")
-
-    print("\hline")
-
-    print(lr, n_iter)
-     """
-
     # Q7
+    print("\n Q7) \n")
 
     lr = 0.1
 
@@ -232,8 +230,14 @@ if __name__ == "__main__":
 
         logistic_reg.fit(X_train, y_train)
         plot_boundary(
-            "../images/logistic_reg_{}_{}".format(n_iter, lr), logistic_reg, X_test, y_test
+            "../images/logistic_reg_{}_{}".format(n_iter, lr),
+            logistic_reg,
+            X_test,
+            y_test,
         )
 
-        print(logistic_reg.score(X_test, y_test))
+        print(
+            "Accuracy for n_iter = {} and learning_rate = {} : {}".format(
+                n_iter, lr, logistic_reg.score(X_test, y_test)
+            ))
 
