@@ -92,8 +92,8 @@ class LogisticRegressionClassifier(BaseEstimator, ClassifierMixin):
                 "This class is only dealing with binary " "classification problems"
             )
 
-        w1 = 1  # init?
-        w2 = 1
+        w1 = 0.2  # init?
+        w2 = -0.2
 
         self.theta_ = np.array([1, w1, w2])  # [bias, param1, param2]
         bias = np.ones(n_instances)  # [1, ..., 1]
@@ -163,10 +163,12 @@ class LogisticRegressionClassifier(BaseEstimator, ClassifierMixin):
 
 
 if __name__ == "__main__":
+
+    # Q5
+
     X_train, X_test, y_train, y_test = split_train_test()
     logistic_reg = LogisticRegressionClassifier()
     logistic_reg.fit(X_train, y_train)
-    z = np.array([1.2, 1.3])
     plot_boundary(
         "../images/LR",
         logistic_reg,
@@ -179,6 +181,8 @@ if __name__ == "__main__":
     n = 5
     scores = np.zeros(n)
     scores = {}
+
+    # Q6
 
     for lr in [0.1, 0.5, 1, 2]:
         for n_iter in [5, 10, 50, 150]:
@@ -201,6 +205,7 @@ if __name__ == "__main__":
         )
         print("-" * 50)
 
+    """ TO DELETE
     for n_iter in [5, 10, 50, 150]:
         print(n_iter)
         for lr in [0.1, 0.5, 1, 2]:
@@ -216,3 +221,19 @@ if __name__ == "__main__":
     print("\hline")
 
     print(lr, n_iter)
+     """
+
+    # Q7
+
+    lr = 0.1
+
+    for n_iter in [1, 5, 20, 100]:
+        logistic_reg = LogisticRegressionClassifier(learning_rate=lr, n_iter=n_iter)
+
+        logistic_reg.fit(X_train, y_train)
+        plot_boundary(
+            "../images/logistic_reg_{}_{}".format(n_iter, lr), logistic_reg, X_test, y_test
+        )
+
+        print(logistic_reg.score(X_test, y_test))
+

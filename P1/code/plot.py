@@ -60,10 +60,7 @@ def plot_boundary(fname, fitted_estimator, X, y, mesh_step_size=0.1, title=""):
     xx, yy = np.meshgrid(np.arange(x_min, x_max, mesh_step_size),
                          np.arange(y_min, y_max, mesh_step_size))
 
-    if hasattr(fitted_estimator, 'decision_function'):
-        Z = fitted_estimator.decision_function(np.c_[xx.ravel(), yy.ravel()])
-    else:
-        Z = fitted_estimator.predict_proba(np.c_[xx.ravel(), yy.ravel()])[:, 1]
+    Z = fitted_estimator.predict_proba(np.c_[xx.ravel(), yy.ravel()])[:, 1]
     Z = Z.reshape(xx.shape)
 
     # Plot the decision boundary. For that, we will assign a color to each
@@ -75,13 +72,15 @@ def plot_boundary(fname, fitted_estimator, X, y, mesh_step_size=0.1, title=""):
         plt.ylabel('$X_2$')
 
         # Put the result into a color plot
-        plt.contourf(xx, yy, Z, cmap=bg_map, alpha=.8)
+        cf = plt.contourf(xx, yy, Z, cmap=bg_map, alpha=0.8, vmin=0, vmax=1)
 
         # Plot testing point
         plt.scatter(X[::5, 0], X[::5, 1], c=y[::5], cmap=sc_map, edgecolor='black',
                     s=10)
         plt.xlim(xx.min(), xx.max())
         plt.ylim(yy.min(), yy.max())
+        plt.clim(np.min(Z), np.max(Z))
+        plt.colorbar(cf)
         plt.gca().set_aspect('equal', adjustable='box')
         plt.savefig('{}.pdf'.format(fname))
     finally:

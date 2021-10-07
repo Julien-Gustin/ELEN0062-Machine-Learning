@@ -61,7 +61,7 @@ if __name__ == "__main__":
         neighbor_classifier.fit(X_train, y_train)
         #Generate graph with boundaries
         file_name = "knn_" + str(n_neighbors) + "_neighbors"
-        plot_boundary("images/" + file_name, neighbor_classifier, X_train, y_train, 0.1, "Test KNN")
+        plot_boundary("../images/" + file_name, neighbor_classifier, X_test, y_test, 0.1, "Test KNN")
         #Memorize the score
         scores.append(neighbor_classifier.score(X_test, y_test))
 
@@ -71,7 +71,7 @@ if __name__ == "__main__":
         #Create classifier 
         neighbor_classifier = KNeighborsClassifier(n_neighbors)
         #Compute score of each fold
-        score_per_fold = cross_val_score(neighbor_classifier, X_train, y_train, cv=10)
+        score_per_fold = cross_val_score(neighbor_classifier, X, y, cv=10)
         #Memorize the score
         scores_cross_val.append(np.mean(score_per_fold))
 
@@ -105,11 +105,11 @@ if __name__ == "__main__":
     plt.ylabel("Mean test accuracy")
     plt.title("Evolution of the mean test accuracies with different training set sizes")
     plt.legend()
-    plt.savefig("images/knn_mean_test_accuracies")
+    plt.savefig("../images/knn_mean_test_accuracies")
     plt.close()
 
     save_best_neighbor_fig(
-        "images/knn_best_neighbor_with_respect_to_training_set_size", 
+        "../images/knn_best_neighbor_with_respect_to_training_set_size", 
         "Training size",
         "Optimal number of neighbors",
         "Optimal number of neighbors with respect to the training set size",
