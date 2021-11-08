@@ -61,7 +61,7 @@ if __name__ == "__main__":
         neighbor_classifier.fit(X_train, y_train)
         #Generate graph with boundaries
         file_name = "knn_" + str(n_neighbors) + "_neighbors"
-        plot_boundary("../images/" + file_name, neighbor_classifier, X_test, y_test, 0.1, "KNN with k = {}".format(n_neighbors))
+        plot_boundary("images/" + file_name, neighbor_classifier, X_test, y_test, 0.1, "KNN with k = {}".format(n_neighbors))
         #Memorize the score
         scores.append(neighbor_classifier.score(X_test, y_test))
 
@@ -83,7 +83,7 @@ if __name__ == "__main__":
     best_neighbors = list()
 
     X_test, y_test = make_unbalanced_dataset(test_set_size, random_state=0)
-    seed = 1
+    seed = 100
 
     for training_set_size in training_set_sizes:
         mean_test_accuracies = np.zeros(training_set_size)
@@ -105,15 +105,15 @@ if __name__ == "__main__":
     plt.ylabel("Mean test accuracy")
     plt.title("Evolution of the mean test accuracies with different training set sizes")
     plt.legend()
-    plt.savefig("../images/knn_mean_test_accuracies")
+    plt.savefig("images/knn_mean_test_accuracies")
     plt.close()
 
     save_best_neighbor_fig(
-        "../images/knn_best_neighbor_with_respect_to_training_set_size", 
+        "images/knn_best_neighbor_with_respect_to_training_set_size", 
         "Training size",
         "Optimal number of neighbors",
         "Optimal number of neighbors with respect to the training set size",
         best_neighbors,
         training_set_sizes)
     plt.close()
-    pass
+

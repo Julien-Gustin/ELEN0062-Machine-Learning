@@ -22,8 +22,7 @@ from sklearn.metrics import confusion_matrix, accuracy_score
 # ...
 import os
 
-PROJECT_ROOT_DIR = ".."
-IMAGES_PATH = os.path.join(PROJECT_ROOT_DIR, "images")
+IMAGES_PATH = os.path.join( "images")
 
 
 def split_train_test(
@@ -78,7 +77,7 @@ def create_and_fit_models(
 def make_plots(
     tree_clf: DecisionTreeClassifier, X: np.array, y: np.array, plot_tree: bool = False,
 ):
-    """Create plot in the "../images" directory
+    """Create plot in the "/images" directory
 
     Args:
         tree_clf (DecisionTreeClassifier): the model used for the plots
@@ -122,7 +121,7 @@ if __name__ == "__main__":
 
     tree_clfs = create_and_fit_models(min_samples_splits, 42, X_train, y_train)
     for tree_clf in tree_clfs:
-        make_plots(tree_clf, X_test, y_test, True)
+        make_plots(tree_clf, X_test, y_test, False)
 
     # Q3
     n = 5

@@ -118,6 +118,7 @@ class LogisticRegressionClassifier(BaseEstimator, ClassifierMixin):
             self.coef_ = self.coef_ - self.learning_rate * loss_coef
             self.intercept_ = self.intercept_ - self.learning_rate * loss_intercept
 
+
         return self
 
     def predict(self, X):
@@ -139,7 +140,7 @@ class LogisticRegressionClassifier(BaseEstimator, ClassifierMixin):
             raise ValueError("X must be 2 dimensional")
         n_instances, n_features = X.shape
 
-        y = np.zeros(n_instances)
+        y = np.ones(n_instances)
         bias = np.ones(n_instances)
         for i, sample in enumerate(X):
             product = self.coef_.dot(sample) + self.intercept_
@@ -184,7 +185,7 @@ if __name__ == "__main__":
     logistic_reg = LogisticRegressionClassifier()
     logistic_reg.fit(X_train, y_train)
     plot_boundary(
-        "../images/LR",
+        "images/LR",
         logistic_reg,
         X_test,
         y_test,
@@ -230,7 +231,7 @@ if __name__ == "__main__":
 
         logistic_reg.fit(X_train, y_train)
         plot_boundary(
-            "../images/logistic_reg_{}_{}".format(n_iter, lr),
+            "images/logistic_reg_{}_{}".format(n_iter, lr),
             logistic_reg,
             X_test,
             y_test,
