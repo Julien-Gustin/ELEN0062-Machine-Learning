@@ -8,6 +8,16 @@ def f(x, scale=0.5, seed=42):
     return np.sin(2*x) + x*np.cos(x - 1) + e
 
 def make_data(N_samples, scale=0.5, seed=42):
+    """Data generator
+
+    Args:
+        N_samples: 
+        scale: Standard deviation Defaults to 0.5.
+        seed: Random seed Defaults to 42.
+
+    Returns:
+        X, Y
+    """
     X = uniform.rvs(loc=-10, scale=20, size=N_samples, random_state=seed)
     X = np.round(X, decimals=1)
     Y = f(X, scale=scale, seed=seed)
