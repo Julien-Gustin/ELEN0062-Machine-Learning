@@ -25,12 +25,13 @@ def load_data(data_path):
         X_test[:, (f-2)*512:(f-2+1)*512] = data
     
     y_train = np.loadtxt(os.path.join(LS_path, 'activity_Id.txt'))
+    subject_train = np.loadtxt(os.path.join(LS_path, 'subject_Id.txt'))
 
     print('X_train size: {}.'.format(X_train.shape))
     print('y_train size: {}.'.format(y_train.shape))
     print('X_test size: {}.'.format(X_test.shape))
 
-    return X_train, y_train, X_test
+    return X_train, y_train, X_test, subject_train
 
 
 def write_submission(y, where, submission_name='toy_submission.csv'):

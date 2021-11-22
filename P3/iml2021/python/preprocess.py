@@ -23,6 +23,37 @@ class CleanNanByMedian(BaseEstimator, TransformerMixin):
         X_clean = np.array(X_df.replace(-999999.99, np.nan).fillna(self.median))
         return X_clean
 
+class CleanNanByMedianV2(BaseEstimator, TransformerMixin):
+    """Clean the data by replacing Nan (-999999.99) by the median of the column OF THE SAME ACTIVITY
+    """
+    def __init__(self):
+        self.medians = [] # Activities go from 1 to 14, (need to do -1 for the list)
+        pass
+
+    def fit_transform(self, X, y):
+        self.fit(X, y)
+        return self.transform(X, y)
+
+    def fit(self, X, y):
+        X_ = X.copy()
+        for yi in np.unique(y): # for each activity
+            Xyi = X_[y == yi] 
+            Xyi_df = pd.DataFrame(Xyi)
+            self.medians.append(Xyi_df.median()) # compute the median for each column (of a same activity)
+
+        return self
+
+    def transform(self, X, y):
+        X_ = X.copy()
+        X_df = pd.DataFrame(X_).replace(-999999.99, np.nan)
+        for yi in np.unique(y): # for each activity
+            yi = int(yi)
+            rows_yi = np.where(y == yi)[0]
+            X_df.loc[rows_yi] = X_df.loc[rows_yi].fillna(value=self.medians[yi-1])
+       
+        X_clean = np.array(X_df)
+        return X_clean
+
 class TimeSerieMaker(BaseEstimator, TransformerMixin):
     """Transform data into time series (in order to be used by sktime)
 
