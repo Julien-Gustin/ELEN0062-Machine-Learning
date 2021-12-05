@@ -4,9 +4,9 @@
 
 import os
 import numpy as np
-
+import pandas as pd
 from sklearn.neighbors import KNeighborsClassifier
-
+from tsfresh.feature_extraction import extract_features
 
 def load_data(data_path):
 
@@ -63,6 +63,26 @@ def write_submission(y, where, submission_name='toy_submission.csv'):
             file.write('{},{}\n'.format(n+1, int(i)))
 
     print('Submission {} saved in {}.'.format(submission_name, SUBMISSION_PATH))
+    
+
+def extract_and_save(X, parameters, folder="LS/extracted_features"):
+    splitted_x = np.split(X, 31, axis=1)
+    for i in range(len(splitted_x)):
+        df = pd.DataFrame(splitted_x[i])
+        df["id"] = df.index
+        df = df.melt(id_vars="id", var_name="time").sort_values(["id", "time"]).reset_index(drop=True)
+        X = extract_features(df, column_id="id", column_sort="time", default_fc_parameters=parameters)
+        X.to_csv("data/{}/sensor_{}.csv".format(folder, i))
+
+def get_features_from(folder="LS/extracted_features"):
+    features = []
+    for i in range(31):
+        t = pd.read_csv("data/{}/sensor_{}.csv".format(folder, i))
+        features.append(np.array(t).T[1:].T)
+
+    X_out = np.concatenate(features, axis=1)
+    return X_out
+
 
 if __name__ == '__main__':
 
